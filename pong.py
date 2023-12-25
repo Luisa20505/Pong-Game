@@ -64,7 +64,7 @@ class Ball:
         display: instance of the display the ball should be drawn too."""
         pygame.draw.ellipse(display, self.color, self.rect)
 
-    def move(self, speed_increment):
+    def move(self, speed_inc):
         """function to move the ball, including colission with playfield-boundries."""
         
         if self.rect.top < 0:
@@ -74,8 +74,7 @@ class Ball:
         if self.rect.bottom > screen_size[1]:
             if self.speed[1] > 0:
                 self.speed[1] = -self.speed[1]
-        
-        self.rect.move_ip([speed * speed_increment for speed in self.speed])
+        self.rect.move_ip([speed * speed_inc for speed in self.speed])
 
 class Obstacle:   
     #defines a new obstacle
@@ -178,7 +177,7 @@ obstacles = [Obstacle(random.randint(100, screen_size[0]-100), random.randint(10
 
 FPS = pygame.time.Clock()
 
-speed_increment = 1
+speed_increment = [1]
 
 paddle1 = Paddle(50, screen_size[1]//2 - 175, 15, 150, 12)
 paddle2 = Paddle(screen_size[0]-65, screen_size[1]//2 - 175, 15, 150, 12)
@@ -191,36 +190,26 @@ particles = []
 trace = []
 MAX_SPEED_SQ = 500
 gamemode = "AI"
-while running:
-    trace += [Trace_particle(*ball.rect.center)]
-    try:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
 
-        keys = pygame.key.get_pressed()
+def move_players():
+    keys = pygame.key.get_pressed()
 
-        # Quadratisches summe der Geschwindigkeiten
-        total_speed = ball.speed[0]*ball.speed[0]*speed_increment + ball.speed[1]*ball.speed[1]*speed_increment
-
-        # Überprüfen, ob die Gesamtgeschwindigkeit den maximalen Wert überschritten hat
-        if total_speed < MAX_SPEED_SQ:
-            speed_increment += 0.0002
-        
-
-        if(gamemode=="AI"):
-            paddle1.move(keys[pygame.K_w], keys[pygame.K_s])
-            if(ball.speed[0] > 0 and ((ball.rect.centery - paddle2.rect.centery) > 20 or (ball.rect.centery - paddle2.rect.centery) < -20)):
-                paddle2.move(ball.rect.centery < paddle2.rect.centery, ball.rect.centery > paddle2.rect.centery)
-       
+    if(gamemode=="PVP"):
+        paddle1.move(keys[pygame.K_w], keys[pygame.K_s])
+        paddle2.move(keys[pygame.K_UP], keys[pygame.K_DOWN])
+    if(gamemode=="AI"):
+        paddle1.move(keys[pygame.K_w], keys[pygame.K_s])
+        if(ball.speed[0] > 0 and ((ball.rect.centery - paddle2.rect.centery) > 20 or (ball.rect.centery - paddle2.rect.centery) < -20)):
+            paddle2.move(ball.rect.centery < paddle2.rect.centery, ball.rect.centery > paddle2.rect.centery)
+    if(gamemode=="LAZY"):
+        if(ball.speed[0] > 0 and ((ball.rect.centery - paddle2.rect.centery) > 20 or (ball.rect.centery - paddle2.rect.centery) < -20)):
+            paddle2.move(ball.rect.centery < paddle2.rect.centery, ball.rect.centery > paddle2.rect.centery)
+        if(ball.speed[0] < 0 and ((ball.rect.centery - paddle1.rect.centery) > 20 or (ball.rect.centery - paddle1.rect.centery) < -20)):
+            paddle1.move(ball.rect.centery < paddle1.rect.centery, ball.rect.centery > paddle1.rect.centery)
 
 
-        ball.move(speed_increment)
-
-        # Ball kollidiert mit linkem paddle
+def check_paddle_colissions():
+     # Ball kollidiert mit linkem paddle
         if ball.rect.colliderect(paddle1.rect) and ball.speed[0]<0:
             ball.speed[0] = -ball.speed[0]
             ball.speed[1] = random.randint(-10, 10)
@@ -230,35 +219,39 @@ while running:
             ball.speed[0] = -ball.speed[0]
             ball.speed[1] = random.randint(-10, 10) 
 
+
+def check_ball_scored(particles):
         #Punkt für rechts
         if ball.rect.left < -10:
             score[1] += 1
-            particles += [Particle(*ball.rect.center) for _ in range(200)]
+            particles += [Particle(*ball.rect.center) for _ in range(300)]
             ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
             ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
-            speed_increment = 1
+            speed_increment[0] = 1
             obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), 50, 50))
 
         #Punkt für links
         elif ball.rect.right > screen_size[0]+10:
             score[0] += 1
-            particles += [Particle(*ball.rect.center) for _ in range(200)]
+            particles += [Particle(*ball.rect.center) for _ in range(300)]
             ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
             ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
-            speed_increment = 1
+            speed_increment[0] = 1
             obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), 50, 50))
 
 
-        #bild reseten
-        display.fill((0, 0, 0))
+def check_colissions_obstacles():
+    #hindernisse zeichnen und kollision
+    for obstacle in obstacles:  
+        if ball.rect.colliderect(obstacle.rect):
+            obstacle.collide_with(ball)
 
-        #hindernisse zeichnen und kollision
-        for obstacle in obstacles:  
+def draw_obstacles():
+    for obstacle in obstacles:  
             obstacle.draw(display)
-            if ball.rect.colliderect(obstacle.rect):
-                obstacle.collide_with(ball)
 
-        # update and draw the particles
+def update_draw_particles():
+    # update and draw the particles
         for particle in particles:
             particle.update()
             particle.draw(display)
@@ -272,18 +265,60 @@ while running:
             if particle.life <= 0:
                 trace.remove(particle)
 
+def zeige_spielstand():
+    font = pygame.font.Font(None, 46)
+    text = font.render("" + str(score[0]) + " : " + str(score[1]), 1, (255, 255, 255))
+    display.blit(text, (screen_size[0]//2 -30, 40))
+     
+def increase_speed():
+    # Quadratisches summe der Geschwindigkeiten
+    total_speed = ball.speed[0]*ball.speed[0]*speed_increment[0] + ball.speed[1]*ball.speed[1]*speed_increment[0]
+
+    # Überprüfen, ob die Gesamtgeschwindigkeit den maximalen Wert überschritten hat
+    if total_speed < MAX_SPEED_SQ:
+        speed_increment[0] = speed_increment[0] + 0.0002
+
+
+
+
+
+# main game loop
+while running:
+    trace += [Trace_particle(*ball.rect.center)]
+    try:
+        #checkt ob das Spiel beendet wurde
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+
+
+
+        move_players()
+        check_paddle_colissions()
+        check_colissions_obstacles()
+        ball.move(speed_increment[0])
+        increase_speed()
+        check_ball_scored(particles)
+
+        #bild reseten (entspricht Hintergrundfarbe)
+        display.fill((0, 0, 0))
+
+        update_draw_particles()
+        zeige_spielstand()
+        draw_obstacles()
+
         #paddles und ball zeichnen
         paddle1.draw(display)
         paddle2.draw(display)
         ball.draw(display)
 
-        #Soielstand zeichnen
-        font = pygame.font.Font(None, 46)
-        text = font.render("" + str(score[0]) + " : " + str(score[1]), 1, (255, 255, 255))
-        display.blit(text, (screen_size[0]//2 -30, 40))
-
         pygame.display.flip()
-        FPS.tick(60) #limitiert bildwiederholungsrate zu 60 fps
+
+        FPS.tick(60) #limitiert bildwiederholungsrate auf 60 fps
+   
     except Exception as e:
         
         print('Fehler : ',e, '  Fehler in Zeile: ', e.__traceback__.tb_lineno)
