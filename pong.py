@@ -2,6 +2,7 @@ import pygame
 import sys
 import random
 import math
+from pygame.draw import polygon
 
 class Paddle:
     #A class defining the Paddles
@@ -164,16 +165,37 @@ class Trace_particle():
         display: the pygame instance of the display to draw on."""
         pygame.draw.rect(display, self.color, self.rect)
 
+class PulsatingText:
+    def __init__(self, display, text, center, font_size=36):
+        self.display = display
+        self.text = text
+        self.center = center
+        self.font_size = font_size
+        self.phase = 0
 
+    def update(self):
+        self.phase = (self.phase + 0.04) % (2 * math.pi)
+
+    def draw(self):
+        pulse_val = abs(math.sin(self.phase)) 
+        pulse_color = (pulse_val * 255, pulse_val * 255, pulse_val * 255)
+        font = pygame.font.SysFont(None, self.font_size) 
+        rendered_text = font.render(self.text, True, pulse_color)
+        text_rect = rendered_text.get_rect(center=self.center)
+        self.display.blit(rendered_text, text_rect)
+            
 pygame.init()
 
-
+#spiel läuft bis zu dieser Punktzahl
+game_length = 2
 
 info_object = pygame.display.Info()
 screen_size = (info_object.current_w, info_object.current_h)
 display = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 
-obstacles = [Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), 50, 50) for _ in range(4)]
+continue_text = PulsatingText(display, "Press Spacebar To Continue", (screen_size[0]//2, 3*screen_size[1]//4), 36)
+
+obstacles = []
 
 FPS = pygame.time.Clock()
 
@@ -189,7 +211,52 @@ running = True
 particles = []
 trace = []
 MAX_SPEED_SQ = 500
-gamemode = "AI"
+gamemode = "PVP"
+
+def draw_crown(pos):
+    x = pos[0]-20
+    y = pos[1]
+    pygame.draw.polygon(display, (255, 223, 0), [(x, y), (x - 10, y + 25), (x + 10, y + 25)])
+    x += 10
+    pygame.draw.polygon(display, (255, 223, 0), [(x, y), (x - 10, y + 25), (x + 10, y + 25)])
+    x += 10
+    pygame.draw.polygon(display, (255, 223, 0), [(x, y), (x - 10, y + 25), (x + 10, y + 25)])
+    x += 10
+    pygame.draw.polygon(display, (255, 223, 0), [(x, y), (x - 10, y + 25), (x + 10, y + 25)])
+    x += 10
+    pygame.draw.polygon(display, (255, 223, 0), [(x, y), (x - 10, y + 25), (x + 10, y + 25)])
+
+def draw_winner_text(winner_paddle):
+    font = pygame.font.SysFont(None, 72, bold=True) 
+    text = font.render("Player " + str(score.index(max(score[0], score[1]))+1) + " Wins!", True, (255, 223, 0))
+    text_rect = text.get_rect(center=(screen_size[0]//2, screen_size[1]//4))
+    pygame.draw.rect(display, winner_paddle.color, text_rect, 2)
+    display.blit(text, text_rect)
+
+
+def game_ended_animation():
+    winner_paddle = paddle1 if score.index(max(score[0],score[1])) == 0 else paddle2
+    x_delta = winner_paddle.rect.centerx - screen_size[0]//2
+    y_delta = winner_paddle.rect.centery - screen_size[1]//2
+    move_by = [0,0]
+
+    move_speed = 10.0 # adjust this value to change the speed of paddles moving towards center
+
+    if abs(x_delta) > 10:
+        move_by[0] = -1.0 * move_speed if x_delta > 0 else move_speed
+    if abs(y_delta) > 10:
+        move_by[1] = -1.0 * move_speed if y_delta > 0 else move_speed
+
+    winner_paddle.rect.move_ip(move_by)
+    winner_paddle.draw(display)
+
+    if abs(x_delta) <= 10 and abs(y_delta) <= 10:
+        draw_crown((winner_paddle.rect.centerx, winner_paddle.rect.y - 40))
+        draw_winner_text(winner_paddle)
+        continue_text.update()
+        continue_text.draw()
+
+    return False
 
 def move_players():
     keys = pygame.key.get_pressed()
@@ -278,13 +345,23 @@ def increase_speed():
     if total_speed < MAX_SPEED_SQ:
         speed_increment[0] = speed_increment[0] + 0.0002
 
-
-
+def game_ended():
+    print("game ended")
+    game_ended_animation()
+    
+    
+def reset_game():
+    score[0] = 0 
+    score[1] = 0 
+    obstacles.clear()
+    paddle1.rect.centerx = 50
+    paddle2.rect.centerx = screen_size[0]-65
 
 
 # main game loop
 while running:
-    trace += [Trace_particle(*ball.rect.center)]
+    if max(score[0], score[1]) < game_length:
+        trace += [Trace_particle(*ball.rect.center)]
     try:
         #checkt ob das Spiel beendet wurde
         for event in pygame.event.get():
@@ -293,15 +370,20 @@ while running:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+                    pygame.quit()
+                    sys.exit()
+                if event.key == pygame.K_SPACE:
+                    reset_game()
+            
 
 
-
-        move_players()
-        check_paddle_colissions()
-        check_colissions_obstacles()
-        ball.move(speed_increment[0])
-        increase_speed()
-        check_ball_scored(particles)
+        if max(score[0], score[1]) < game_length:
+            move_players()
+            check_paddle_colissions()
+            check_colissions_obstacles()
+            ball.move(speed_increment[0])
+            increase_speed()
+            check_ball_scored(particles)
 
         #bild reseten (entspricht Hintergrundfarbe)
         display.fill((0, 0, 0))
@@ -313,8 +395,15 @@ while running:
         #paddles und ball zeichnen
         paddle1.draw(display)
         paddle2.draw(display)
-        ball.draw(display)
+        if max(score[0], score[1]) < game_length:
+            ball.draw(display)
 
+        if max(score[0], score[1]) >= game_length:
+            #running = False
+            game_ended()
+            # pygame.quit()
+            # sys.exit()
+            
         pygame.display.flip()
 
         FPS.tick(60) #limitiert bildwiederholungsrate auf 60 fps
@@ -324,7 +413,6 @@ while running:
         print('Fehler : ',e, '  Fehler in Zeile: ', e.__traceback__.tb_lineno)
         running = False
         break
-
 
 pygame.quit()
 sys.exit()
