@@ -2,7 +2,6 @@ import pygame
 import sys
 import random
 import math
-from pygame.draw import polygon
 
 class Paddle:
     #A class defining the Paddles
@@ -346,7 +345,6 @@ def increase_speed():
         speed_increment[0] = speed_increment[0] + 0.0002
 
 def game_ended():
-    print("game ended")
     game_ended_animation()
     
     
