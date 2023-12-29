@@ -185,6 +185,8 @@ class PulsatingText:
             
 pygame.init()
 
+pygame.mouse.set_visible(False)
+
 #spiel läuft bis zu dieser Punktzahl
 game_length = 2
 
@@ -194,7 +196,9 @@ display = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 
 continue_text = PulsatingText(display, "Press Spacebar To Continue", (screen_size[0]//2, 3*screen_size[1]//4), 36)
 
-obstacles = []
+#initialisiert die obstacles
+obstacles = [Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)) for i in range(0,2)]
+
 
 FPS = pygame.time.Clock()
 
@@ -210,7 +214,7 @@ running = True
 particles = []
 trace = []
 MAX_SPEED_SQ = 500
-gamemode = "PVP"
+gamemode = "AI"
 
 def draw_crown(pos):
     x = pos[0]-20
@@ -294,7 +298,7 @@ def check_ball_scored(particles):
             ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
             ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
             speed_increment[0] = 1
-            obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), 50, 50))
+            obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
 
         #Punkt für links
         elif ball.rect.right > screen_size[0]+10:
@@ -303,7 +307,7 @@ def check_ball_scored(particles):
             ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
             ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
             speed_increment[0] = 1
-            obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), 50, 50))
+            obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
 
 
 def check_colissions_obstacles():
