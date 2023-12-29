@@ -56,7 +56,7 @@ class Ball:
         """
         self.rect = pygame.Rect(x, y, radius*2, radius*2)
         self.color = (255, 255, 255)
-        self.speed = [speed * random.choice((-1, 1)), speed * random.choice((-1, 1))]
+        self.speed = [speed * random.choice((-1.5, 1.5)), speed * random.choice((-1, 1))]
 
     def draw(self, display:pygame.display):
         """draws the ball onto the frame.
@@ -188,7 +188,7 @@ pygame.init()
 pygame.mouse.set_visible(False)
 
 #spiel läuft bis zu dieser Punktzahl
-game_length = 2
+game_length = 5
 
 info_object = pygame.display.Info()
 screen_size = (info_object.current_w, info_object.current_h)
@@ -296,7 +296,7 @@ def check_ball_scored(particles):
             score[1] += 1
             particles += [Particle(*ball.rect.center) for _ in range(300)]
             ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
-            ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
+            ball.speed = [5 * random.choice((-1.5, 1.5)), 5 * random.choice((-1, 1))] 
             speed_increment[0] = 1
             obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
 
@@ -305,7 +305,7 @@ def check_ball_scored(particles):
             score[0] += 1
             particles += [Particle(*ball.rect.center) for _ in range(300)]
             ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
-            ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
+            ball.speed = [5 * random.choice((-1.5, 1.5)), 5 * random.choice((-1, 1))] 
             speed_increment[0] = 1
             obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
 
@@ -374,7 +374,7 @@ while running:
                     running = False
                     pygame.quit()
                     sys.exit()
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE and max(score[0], score[1]) >= game_length:
                     reset_game()
             
 
