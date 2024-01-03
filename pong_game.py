@@ -2,9 +2,14 @@ import pygame
 import sys
 import random
 import math
-import time
+import os
 
 game_started = [False]
+pygame.init()
+info_object = pygame.display.Info()
+screen_size = (info_object.current_w, info_object.current_h)
+radius = 30
+
 class Paddle:
     #A class defining the Paddles
     def __init__(self, x:int, y:int, width:int, height:int, speed:int):
@@ -50,7 +55,7 @@ class Ball:
         self.speed = [speed * random.choice((-1, 1)), speed * random.choice((-1, 1))]
         self.speed = [speed * random.choice((-1.5, 1.5)), speed * random.choice((-1, 1))]
 
-        self.image = pygame.image.load('SoccerBall.png') 
+        self.image = pygame.image.load('Bilder/Ball/SoccerBall.png') 
         self.image = pygame.transform.scale(self.image, (radius*2, radius*2))  
 
     def draw(self, display:pygame.display):
@@ -65,12 +70,14 @@ class Ball:
         if self.rect.top < 0:
             if self.speed[1] < 0:
                 self.speed[1] = -self.speed[1]
-                pygame.mixer.Sound.play(bounce)
+                if game_started[0]:
+                    pygame.mixer.Sound.play(bounce)
             
         if self.rect.bottom > screen_size[1]:
             if self.speed[1] > 0:
                 self.speed[1] = -self.speed[1]
-                pygame.mixer.Sound.play(bounce)
+                if game_started[0]:
+                    pygame.mixer.Sound.play(bounce)
         self.rect.move_ip([speed * speed_inc for speed in self.speed])
 
 class Obstacle:   
@@ -177,31 +184,100 @@ class PulsatingText:
         text_rect = rendered_text.get_rect(center=self.center)
         self.display.blit(rendered_text, text_rect)
             
-pygame.init()
+class Startmenu():
+    def __init__(self, display):
+        self.display = display
+        folder_path = "Bilder/Ball"
+        self.ball_options = []
+        self.index = 0
+        self.font_size = 25
+        self.font = pygame.font.SysFont(None, self.font_size) 
+        for filename in os.listdir(folder_path):
+            # Stelle den vollständigen Pfad zur Datei her
+            filepath = os.path.join(folder_path, filename)
+
+            # Überprüfe, ob die Datei eine Bilddatei ist (z.B. endet auf .png)
+            if filepath.endswith((".png", ".jpg", ".jpeg")):
+                # Lade das Bild und füge es zur Liste hinzu
+                image = pygame.image.load(filepath)
+                image = pygame.transform.scale(image, (radius*4, radius*4)) 
+                self.ball_options.append(image)
+        
+        PulsatingText(display, "Press Spacebar To Play", (screen_size[0]//2, 3*screen_size[1]//4), 36)
+
+
+    def draw(self):
+        x = screen_size[0]//2
+        y = 150
+        # Links-Dreieck (Pfeil)
+        pygame.draw.polygon(self.display, (255, 0, 0), ((x-75-radius, y), (x-radius-50, y-15), (x-radius-50, y+15)))
+        # Rechts-Dreieck (Pfeil)
+        pygame.draw.polygon(self.display, (255, 0, 0), ((x+75+radius, y), (x+radius+50, y-15), (x+radius+50, y+15)))
+        
+        # Ausgewählten Ball zeichnen
+        ball_image = self.ball_options[self.index]
+        self.display.blit(ball_image, (x-radius*2, y-radius*2))
+
+        # Text für die aktuelle Auswahl zeichnen
+        text = self.font.render(f"{self.index + 1}/{len(self.ball_options)}", True, (255, 255, 255))  # Weißer Text
+        self.display.blit(text, (x-15, y+radius+75))  # Wählen Sie eine geeignete Position
+
+    def next_ball(self):
+        # Vorherigen Ball auswählen
+        print('next')
+        self.index += 1
+        if self.index >= len(self.ball_options):
+            self.index = 0
+
+    def prev_ball(self):
+        # Nächsten Ball auswählen
+        print('Prev')
+        self.index -= 1
+        if self.index < 0:
+            self.index = len(self.ball_options) - 1
+
+        
+    def check_input(self, events):
+        x = screen_size[0]//2
+        y = 150
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                print(mouse_pos)
+                print(self.index)
+
+                if pygame.Rect(x-radius-85, y-30, radius+40, 70).collidepoint(mouse_pos): 
+                    self.prev_ball()
+                elif pygame.Rect(x+radius+5, y-30, radius+60, 70).collidepoint(mouse_pos): 
+                    self.next_ball()
+                print(self.index)
+    
+    def get_curr_im(self):
+        image = self.ball_options[self.index]
+        image = pygame.transform.scale(image, (radius*2, radius*2)) 
+        return image
+
 pygame.mixer.init()
-pygame.mixer.music.load("music-background.mp3") 
+pygame.mixer.music.load("Sounds/music-background.mp3") 
 pygame.mixer.music.play(-1,0.0)
-pygame.mouse.set_visible(False)
 
-explosion = pygame.mixer.Sound("explosion.mp3")
+explosion = pygame.mixer.Sound("Sounds/explosion.mp3")
 explosion.set_volume(0.2)
+bounce = pygame.mixer.Sound("Sounds/bounce.wav")
 
-bounce = pygame.mixer.Sound("bounce.wav")
-
-#spiel läuft bis zu dieser Punktzahl
+# spiel läuft bis zu dieser Punktzahl, anfangs auf 100, damit die Paddles bei Start im Hintergrund lange spielen
 game_length = [100]
 
-info_object = pygame.display.Info()
-screen_size = (info_object.current_w, info_object.current_h)
 display = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 
+start_menu = Startmenu(display)
 #initialisiert die obstacles
 obstacles = [Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)) for i in range(0,2)]
 FPS = pygame.time.Clock()
 speed_increment = [1]
 paddle1 = Paddle(50, screen_size[1]//2 - 175, 15, 150, 12)
 paddle2 = Paddle(screen_size[0]-65, screen_size[1]//2 - 175, 15, 150, 12)
-ball = Ball(screen_size[0]//2, screen_size[1]//2, 30, 6)
+ball = Ball(screen_size[0]//2, screen_size[1]//2, radius, 6)
 score = [0, 0]
 running = True
 particles: list = []
@@ -268,19 +344,22 @@ def check_paddle_colissions():
         if ball.rect.colliderect(paddle1.rect) and ball.speed[0]<0:
             ball.speed[0] = -ball.speed[0]
             ball.speed[1] = random.randint(-10, 10)
-            pygame.mixer.Sound.play(bounce)
+            if game_started[0]:
+                pygame.mixer.Sound.play(bounce)
         # Ball kollidiert mit rechtem paddle
         if ball.rect.colliderect(paddle2.rect) and ball.speed[0]>0:
             ball.speed[0] = -ball.speed[0]
             ball.speed[1] = random.randint(-10, 10) 
-            pygame.mixer.Sound.play(bounce)
+            if game_started[0]:
+                pygame.mixer.Sound.play(bounce)
 
 def check_ball_scored(particles):
         #Punkt für rechts
         if ball.rect.left < -10:
             score[1] += 1
             particles += [Particle(*ball.rect.center) for _ in range(300)]
-            pygame.mixer.Sound.play(explosion)
+            if game_started[0]:
+                pygame.mixer.Sound.play(explosion)
             ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
             ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
             ball.speed = [5 * random.choice((-1.5, 1.5)), 5 * random.choice((-1, 1))] 
@@ -292,7 +371,8 @@ def check_ball_scored(particles):
         elif ball.rect.right > screen_size[0]+10:
             score[0] += 1
             particles += [Particle(*ball.rect.center) for _ in range(300)]
-            pygame.mixer.Sound.play(explosion)
+            if game_started[0]:
+                pygame.mixer.Sound.play(explosion)
             ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
             ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
             ball.speed = [5 * random.choice((-1.5, 1.5)), 5 * random.choice((-1, 1))] 
@@ -305,8 +385,14 @@ def check_colissions_obstacles():
     for obstacle in obstacles:  
         if ball.rect.colliderect(obstacle.rect):
             obstacle.collide_with(ball)
-            pygame.mixer.Sound.play(bounce)
+            if game_started[0]:
+                pygame.mixer.Sound.play(bounce)
             
+def dim_screen(x):
+    dim_surface = pygame.Surface((screen_size))  
+    dim_surface.fill((0,0,0)) 
+    dim_surface.set_alpha(int(256 * (x/100))) 
+    display.blit(dim_surface, (0,0))
 
 def draw_obstacles():
     for obstacle in obstacles:  
@@ -354,21 +440,27 @@ def reset_game():
     obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
     PulsatingText.Texts.clear()
     game_started[0] = True
-    game_length[0] = 1
+    game_length[0] = 5
     ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
     ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
     ball.speed = [5 * random.choice((-1.5, 1.5)), 5 * random.choice((-1, 1))] 
     speed_increment[0] = 1
-    display.fill((0,0,0))
+    display.fill((15,15,15))
     zeige_spielstand()
     draw_obstacles()
     paddle1.draw(display)
     paddle2.draw(display)
+    ball.image = start_menu.get_curr_im()
     ball.draw(display)
     trace.clear()
+    pygame.mouse.set_visible(False)
     pygame.display.update()
+    pygame.event.pump()
     pygame.time.delay(1500)  
+
     
+
+
     
 
 # main game loop
@@ -377,7 +469,8 @@ while running:
         trace += [Trace_particle(*ball.rect.center)]
     try:
         #checkt ob das Spiel beendet wurde
-        for event in pygame.event.get():
+        events = pygame.event.get() 
+        for event in events:
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
@@ -402,10 +495,14 @@ while running:
             increase_speed()
             check_ball_scored(particles)
         #bild reseten (entspricht Hintergrundfarbe)
-        display.fill((0, 0, 0))
+        display.fill((15, 15, 15))
         update_draw_particles()
         zeige_spielstand()
         draw_obstacles()
+
+        if max(score[0], score[1]) >= game_length[0]:
+            dim_screen(60)
+
         #paddles und ball zeichnen
         paddle1.draw(display)
         paddle2.draw(display)
@@ -417,13 +514,15 @@ while running:
                 PulsatingText(display, "Press Spacebar To Continue", (screen_size[0]//2, 3*screen_size[1]//4), 36)
                 do_on_end_bool = False
 
+        
+        if not game_started[0]:
+            dim_screen(60)
+            start_menu.check_input(events)
+            start_menu.draw()
+
         for t in PulsatingText.Texts:
             t.update()
             t.draw()
-        
-        if not game_started[0]:
-            pass
-
             
         pygame.display.flip()
         FPS.tick(60) #limitiert bildwiederholungsrate auf 60 fps

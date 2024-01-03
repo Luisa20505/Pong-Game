@@ -1,0 +1,15 @@
+
+Pictures:
+    - hayashi19 (opengameart.org/content/ball-collection)
+    - gothicfan95 (opengameart.org/content/soccer-ball)
+
+Sounds:
+    - explosion
+    - OwlStorm (freesound.org/people/OwlStorm/sounds/404769/)
+    - davo32 (freesound.org/people/davo32/sounds/628445/)
+
+
+All sound and music utilized in this project are used under Creative Commons Attribution or similar licenses.
+
+https://creativecommons.org/licenses/by/4.0/
+https://creativecommons.org/publicdomain/zero/1.0/
