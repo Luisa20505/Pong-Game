@@ -5,6 +5,7 @@ This repository contains the source code for an implementation of the classic Po
 ## Features
 
 - Two player / PC game mode.
+- Obstacles for the ball to hit
 - Customizable ball skins.
 - Sound effects and background music.
 
@@ -22,6 +23,7 @@ This will start the game.
 ## Controls
 
 - Player 1 uses the W and S keys to move their paddle up and down.
+When in PVP mode:
 - Player 2 uses the Up and Down arrows to move their paddle up and down.
 
 ## Sound and Music Licensing
