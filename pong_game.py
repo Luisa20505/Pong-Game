@@ -208,7 +208,7 @@ class Startmenu():
 
     def draw(self):
         x = screen_size[0]//2
-        y = 150
+        y = 200
         # Links-Dreieck (Pfeil)
         pygame.draw.polygon(self.display, (255, 0, 0), ((x-75-radius, y), (x-radius-50, y-15), (x-radius-50, y+15)))
         # Rechts-Dreieck (Pfeil)
@@ -237,7 +237,7 @@ class Startmenu():
         
     def check_input(self, events):
         x = screen_size[0]//2
-        y = 150
+        y = 200
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
