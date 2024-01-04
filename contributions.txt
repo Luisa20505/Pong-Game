@@ -9,7 +9,7 @@ Sounds:
     - davo32 (freesound.org/people/davo32/sounds/628445/)
 
 
-All sound and music utilized in this project are used under Creative Commons Attribution or similar licenses.
+All pictures, sound and music utilized in this project are used under Creative Commons Attribution or share alike licenses.
 
 https://creativecommons.org/licenses/by/4.0/
 https://creativecommons.org/publicdomain/zero/1.0/
