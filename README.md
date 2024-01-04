@@ -5,7 +5,6 @@ This repository contains the source code for an implementation of the classic Po
 ## Features
 
 - Two player / PC game mode.
-- Various types of obstacles.
 - Customizable ball skins.
 - Sound effects and background music.
 
