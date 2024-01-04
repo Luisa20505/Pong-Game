@@ -29,5 +29,5 @@ When in PVP mode:
 
 ## Sound and Music Licensing
 
-All sound and music utilized in this project are under Creative Commons Attribution or share alike licenses.
+All sound and music utilized in this project are used under Creative Commons Attribution or share alike licenses.
 
