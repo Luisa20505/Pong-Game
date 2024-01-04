@@ -434,6 +434,7 @@ def reset_game():
     obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
     obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
     PulsatingText.Texts.clear()
+    particles.clear()
     game_started[0] = True
     game_length[0] = 5
     ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
