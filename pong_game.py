@@ -224,14 +224,12 @@ class Startmenu():
 
     def next_ball(self):
         # Vorherigen Ball auswählen
-        print('next')
         self.index += 1
         if self.index >= len(self.ball_options):
             self.index = 0
 
     def prev_ball(self):
         # Nächsten Ball auswählen
-        print('Prev')
         self.index -= 1
         if self.index < 0:
             self.index = len(self.ball_options) - 1
@@ -243,14 +241,11 @@ class Startmenu():
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
-                print(mouse_pos)
-                print(self.index)
 
                 if pygame.Rect(x-radius-85, y-30, radius+40, 70).collidepoint(mouse_pos): 
                     self.prev_ball()
                 elif pygame.Rect(x+radius+5, y-30, radius+60, 70).collidepoint(mouse_pos): 
                     self.next_ball()
-                print(self.index)
     
     def get_curr_im(self):
         image = self.ball_options[self.index]
@@ -516,7 +511,7 @@ while running:
 
         
         if not game_started[0]:
-            dim_screen(60)
+            dim_screen(70)
             start_menu.check_input(events)
             start_menu.draw()
 
