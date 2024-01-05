@@ -186,6 +186,7 @@ class PulsatingText:
             
 class Startmenu():
     def __init__(self, display):
+        self.selected_gamemode = 'AI'
         self.display = display
         folder_path = "Bilder/Ball"
         self.ball_options = []
@@ -222,6 +223,22 @@ class Startmenu():
         text = self.font.render(f"{self.index + 1}/{len(self.ball_options)}", True, (255, 255, 255))  # Weißer Text
         self.display.blit(text, (x-15, y+radius+75))  # Wählen Sie eine geeignete Position
 
+        # Text für Gamemodeauswahl zeichnen (Spiel läuft im Hintergrund im Lazy-Modus)
+        text = self.font.render(f"Gamemode: {self.selected_gamemode}", True, (255, 255, 255))
+        self.display.blit(text, (x-15, y+radius+100))
+
+        #zeichnet Feld für Gamemodeauswahl
+        if(self.selected_gamemode == 'AI'):
+            #draw small rectangle on the left side inside the gamemode rectangle
+            pygame.draw.rect(self.display, (255, 0, 0), (x-85-radius, y+125, 30, 20), 0)
+        elif(self.selected_gamemode == 'PVP'):
+            #draw small rectangle on the right side inside the gamemode rectangle
+            pygame.draw.rect(self.display, (255, 0, 0), (x-55-radius, y+125, 30, 20), 0)
+        
+        pygame.draw.rect(self.display, (127, 0, 0), (x-90-radius, y+120, 70, 30), 2)
+
+
+
     def next_ball(self):
         # Vorherigen Ball auswählen
         self.index += 1
@@ -233,6 +250,13 @@ class Startmenu():
         self.index -= 1
         if self.index < 0:
             self.index = len(self.ball_options) - 1
+
+    def next_gamemode(self):
+        # Vorherigen Gamemode auswählen
+        if self.selected_gamemode == 'AI':
+            self.selected_gamemode = 'PVP'
+        elif self.selected_gamemode == 'PVP':
+            self.selected_gamemode = 'AI'
 
         
     def check_input(self, events):
@@ -246,11 +270,17 @@ class Startmenu():
                     self.prev_ball()
                 elif pygame.Rect(x+radius+5, y-30, radius+60, 70).collidepoint(mouse_pos): 
                     self.next_ball()
+                elif pygame.Rect(x-85-radius, y+100, radius+40, 70).collidepoint(mouse_pos): 
+                    self.next_gamemode()
+        
     
     def get_curr_im(self):
         image = self.ball_options[self.index]
         image = pygame.transform.scale(image, (radius*2, radius*2)) 
         return image
+    
+    def get_curr_gamemode(self):
+        return self.selected_gamemode
 
 pygame.mixer.init()
 pygame.mixer.music.load("Sounds/music-background.mp3") 
@@ -278,7 +308,7 @@ running = True
 particles: list = []
 trace: list = []
 MAX_SPEED_SQ = 500
-gamemode = "LAZY"
+gamemode = ["LAZY"]
 
 do_on_end_bool = True
 
@@ -321,14 +351,14 @@ def game_ended_animation():
 
 def move_players():
     keys = pygame.key.get_pressed()
-    if(gamemode=="PVP"):
+    if(gamemode[0]=="PVP"):
         paddle1.move(keys[pygame.K_w], keys[pygame.K_s])
         paddle2.move(keys[pygame.K_UP], keys[pygame.K_DOWN])
-    if(gamemode=="AI"):
+    if(gamemode[0]=="AI"):
         paddle1.move(keys[pygame.K_w], keys[pygame.K_s])
         if(ball.speed[0] > 0 and ((ball.rect.centery - paddle2.rect.centery) > 20 or (ball.rect.centery - paddle2.rect.centery) < -20)):
             paddle2.move(ball.rect.centery < paddle2.rect.centery, ball.rect.centery > paddle2.rect.centery)
-    if(gamemode=="LAZY"):
+    if(gamemode[0]=="LAZY"):
         if(ball.speed[0] > 0 and ((ball.rect.centery - paddle2.rect.centery) > 20 or (ball.rect.centery - paddle2.rect.centery) < -20)):
             paddle2.move(ball.rect.centery < paddle2.rect.centery, ball.rect.centery > paddle2.rect.centery)
         if(ball.speed[0] < 0 and ((ball.rect.centery - paddle1.rect.centery) > 20 or (ball.rect.centery - paddle1.rect.centery) < -20)):
@@ -424,6 +454,7 @@ def game_ended():
     
     
 def reset_game():
+    gamemode[0] = start_menu.get_curr_gamemode()
     score[0] = 0 
     score[1] = 0 
     obstacles.clear()
@@ -477,7 +508,7 @@ while running:
                 if event.key == pygame.K_SPACE:
                     if not game_started[0]:
                         reset_game()
-                        gamemode = "AI"
+                        gamemode[0] = start_menu.get_curr_gamemode()
                     if event.key == pygame.K_SPACE and max(score[0], score[1]) >= game_length[0]:
                         reset_game()
                         do_on_end_bool = True
