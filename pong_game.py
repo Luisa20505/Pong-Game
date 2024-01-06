@@ -9,6 +9,7 @@ pygame.init()
 info_object = pygame.display.Info()
 screen_size = (info_object.current_w, info_object.current_h)
 radius = 30
+background_color = (20, 20, 20)
 
 class Paddle:
     #A class defining the Paddles
@@ -245,11 +246,15 @@ class Startmenu():
         if self.index >= len(self.ball_options):
             self.index = 0
 
+        pygame.mixer.Sound.play(click_sound)
+
     def prev_ball(self):
         # Nächsten Ball auswählen
         self.index -= 1
         if self.index < 0:
             self.index = len(self.ball_options) - 1
+
+        pygame.mixer.Sound.play(click_sound)
 
     def next_gamemode(self):
         # Vorherigen Gamemode auswählen
@@ -257,6 +262,8 @@ class Startmenu():
             self.selected_gamemode = 'PVP'
         elif self.selected_gamemode == 'PVP':
             self.selected_gamemode = 'AI'
+
+        pygame.mixer.Sound.play(click_sound)
 
         
     def check_input(self, events):
@@ -289,6 +296,7 @@ pygame.mixer.music.play(-1,0.0)
 explosion = pygame.mixer.Sound("Sounds/explosion.mp3")
 explosion.set_volume(0.2)
 bounce = pygame.mixer.Sound("Sounds/bounce.wav")
+click_sound = pygame.mixer.Sound("Sounds/click.wav")
 
 # spiel läuft bis zu dieser Punktzahl, anfangs auf 100, damit die Paddles bei Start im Hintergrund lange spielen
 game_length = [100]
@@ -472,7 +480,7 @@ def reset_game():
     ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
     ball.speed = [5 * random.choice((-1.5, 1.5)), 5 * random.choice((-1, 1))] 
     speed_increment[0] = 1
-    display.fill((15,15,15))
+    display.fill(background_color)
     zeige_spielstand()
     draw_obstacles()
     paddle1.draw(display)
@@ -522,7 +530,7 @@ while running:
             increase_speed()
             check_ball_scored(particles)
         #bild reseten (entspricht Hintergrundfarbe)
-        display.fill((15, 15, 15))
+        display.fill(background_color)
         update_draw_particles()
         zeige_spielstand()
         draw_obstacles()
