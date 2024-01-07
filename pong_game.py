@@ -297,6 +297,7 @@ explosion = pygame.mixer.Sound("Sounds/explosion.mp3")
 explosion.set_volume(0.2)
 bounce = pygame.mixer.Sound("Sounds/bounce.wav")
 click_sound = pygame.mixer.Sound("Sounds/click.wav")
+click_sound.set_volume(0.2)
 
 # spiel läuft bis zu dieser Punktzahl, anfangs auf 100, damit die Paddles bei Start im Hintergrund lange spielen
 game_length = [100]
