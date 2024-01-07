@@ -562,7 +562,7 @@ while running:
             t.draw()
             
         pygame.display.flip()
-        #FPS.tick_busy_loop(60) #limitiert bildwiederholungsrate auf 60 fps
+        FPS.tick_busy_loop(60) #limitiert bildwiederholungsrate auf 60 fps
         #time_delta = pygame.time.get_ticks() - times
         #times = pygame.time.get_ticks()
         #print(1000/time_delta)
