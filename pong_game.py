@@ -3,6 +3,7 @@ import sys
 import random
 import math
 import os
+import time
 
 game_started = [False]
 pygame.init()
@@ -302,7 +303,7 @@ click_sound.set_volume(0.2)
 # spiel läuft bis zu dieser Punktzahl, anfangs auf 100, damit die Paddles bei Start im Hintergrund lange spielen
 game_length = [100]
 
-display = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+display = pygame.display.set_mode(screen_size, pygame.FULLSCREEN | pygame.SCALED, vsync=True)
 
 start_menu = Startmenu(display)
 #initialisiert die obstacles
@@ -498,7 +499,7 @@ def reset_game():
 
 
     
-
+times = 0
 # main game loop
 while running:
     if max(score[0], score[1]) < game_length[0]:
@@ -561,8 +562,11 @@ while running:
             t.draw()
             
         pygame.display.flip()
-        FPS.tick(60) #limitiert bildwiederholungsrate auf 60 fps
-   
+        #FPS.tick_busy_loop(60) #limitiert bildwiederholungsrate auf 60 fps
+        #time_delta = pygame.time.get_ticks() - times
+        #times = pygame.time.get_ticks()
+        #print(1000/time_delta)
+        
     except Exception as e:
         
         print('Fehler : ',e, '  Fehler in Zeile: ', e.__traceback__.tb_lineno)
