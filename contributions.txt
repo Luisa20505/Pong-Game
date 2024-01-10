@@ -7,6 +7,7 @@ Sounds:
     - explosion
     - OwlStorm (freesound.org/people/OwlStorm/sounds/404769/)
     - davo32 (freesound.org/people/davo32/sounds/628445/)
+    - stijn (freesound.org/people/stijn/sounds/43676/)
 
 
 All pictures, sound and music utilized in this project are used under Creative Commons Attribution or share alike licenses.
