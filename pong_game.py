@@ -1,3 +1,8 @@
+#Implementation von Pong mithilfe von Pygame
+#Authors: Jonas Gießler, Luisa Gaiser
+#Bild und Soundquellen siehe contributions.txt
+
+
 import pygame
 import sys
 import random
