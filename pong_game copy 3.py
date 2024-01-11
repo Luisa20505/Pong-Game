@@ -4,7 +4,7 @@ import random
 import math
 import os
 
-game_started = [False]
+
 pygame.init()
 info_object = pygame.display.Info()
 screen_size = (info_object.current_w, info_object.current_h)
@@ -56,7 +56,7 @@ class Ball:
         self.speed = [speed * random.choice((-1, 1)), speed * random.choice((-1, 1))]
         self.speed = [speed * random.choice((-1.5, 1.5)), speed * random.choice((-1, 1))]
 
-        self.image = pygame.image.load('Bilder/Ball/SoccerBall.png') 
+        self.image = pygame.image.load('Bilder/Ball/0SoccerBall.png') 
         self.image = pygame.transform.scale(self.image, (radius*2, radius*2))  
 
     def draw(self, display:pygame.display):
@@ -71,13 +71,13 @@ class Ball:
         if self.rect.top < 0:
             if self.speed[1] < 0:
                 self.speed[1] = -self.speed[1]
-                if game_started[0]:
+                if gs.game_started:
                     pygame.mixer.Sound.play(gs.bounce)
             
         if self.rect.bottom > screen_size[1]:
             if self.speed[1] > 0:
                 self.speed[1] = -self.speed[1]
-                if game_started[0]:
+                if gs.game_started:
                     pygame.mixer.Sound.play(gs.bounce)
         self.rect.move_ip([speed * speed_inc for speed in self.speed])
 
@@ -185,6 +185,51 @@ class PulsatingText:
         text_rect = rendered_text.get_rect(center=self.center)
         self.display.blit(rendered_text, text_rect)
             
+class Slider():
+    def __init__(self, display, x, y, width, height, color, min_val, max_val, start_val):
+        self.display = display
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.color = color 
+        self.min_val = min_val
+        self.max_val = max_val
+        self.start_val = start_val
+        self.current_val = start_val
+        self.rect = pygame.Rect(x, y, width, height)
+        self.dragging = False
+        self.dragging_pos = 0
+    
+    def draw(self):
+        pygame.draw.rect(self.display, self.color, self.rect)
+        pygame.draw.rect(self.display, (0, 0, 0), self.rect, 2)
+        pygame.draw.rect(self.display, (255, 255, 255), (self.x + self.current_val/self.max_val * self.width - 5, self.y - 5, 10, self.height + 10), 2)
+        font = pygame.font.SysFont(None, 36)
+        text = font.render(str(self.current_val), True, (255, 255, 255))
+        self.display.blit(text, (self.x + self.current_val/self.max_val * self.width - 10, self.y + self.height + 10))
+    
+    def check_input(self, events):
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if self.rect.collidepoint(mouse_pos): 
+                    self.dragging = True
+                    self.dragging_pos = mouse_pos[0] - self.x
+                    self.current_val = (mouse_pos[0] - self.x) / self.width * self.max_val
+                    self.current_val = int(max(self.min_val, min(self.current_val, self.max_val)))
+            elif event.type == pygame.MOUSEBUTTONUP:
+                mouse_pos = pygame.mouse.get_pos()
+                self.dragging = False
+                if self.rect.collidepoint(mouse_pos): 
+                    pygame.mixer.Sound.play(gs.click_sound)
+            elif event.type == pygame.MOUSEMOTION:
+                if self.dragging:
+                    mouse_pos = pygame.mouse.get_pos()
+                    self.current_val = (mouse_pos[0] - self.x) / self.width * self.max_val
+                    self.current_val = int(max(self.min_val, min(self.current_val, self.max_val)))
+
+
 class Startmenu():
     def __init__(self, display):
         self.selected_gamemode = 'AI'
@@ -194,13 +239,24 @@ class Startmenu():
         self.index = 0
         self.font_size = 25
         self.font = pygame.font.SysFont(None, self.font_size) 
+        self.color_l = (0,0,0)
+        self.color_r = (0,0,0)
+        y = 200
+        self.slider1 = Slider(display, screen_size[0]//2 - 80, y+220, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
+        self.slider2 = Slider(display, screen_size[0]//2 - 80, y+270, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
+        self.slider3 = Slider(display, screen_size[0]//2 - 80, y+320, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
+
+        self.slider_r_1 = Slider(display, screen_size[0]//2 - 100, y+420, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
+        self.slider_r_2 = Slider(display, screen_size[0]//2 - 100, y+470, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
+        self.slider_r_3 = Slider(display, screen_size[0]//2 - 100, y+520, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
+
         for filename in os.listdir(folder_path):
-            # Stelle den vollständigen Pfad zur Datei her
+            # Stellt den vollständigen Pfad zur Datei her
             filepath = os.path.join(folder_path, filename)
 
-            # Überprüfe, ob die Datei eine Bilddatei ist (z.B. endet auf .png)
+            # Überprüft, ob die Datei eine Bilddatei ist (z.B. endet auf .png)
             if filepath.endswith((".png", ".jpg", ".jpeg")):
-                # Lade das Bild und füge es zur Liste hinzu
+                # Lädt das Bild und fügt es zur Liste hinzu
                 image = pygame.image.load(filepath)
                 image = pygame.transform.scale(image, (radius*4, radius*4)) 
                 self.ball_options.append(image)
@@ -238,6 +294,20 @@ class Startmenu():
         
         pygame.draw.rect(self.display, (127, 0, 0), (x-90-radius, y+120, 70, 30), 2)
 
+        # draws a paddle to select its colors
+        text = self.font.render(f"Farbauswahl links:", True, (255, 255, 255))  # Weißer Text
+        self.display.blit(text, (x-60, y+180))  # Wählen Sie eine geeignete Position
+        pygame.draw.rect(self.display, self.color_l, (x-120, y+200, 15, 150), 0)
+        self.slider1.draw()
+        self.slider2.draw()
+        self.slider3.draw()
+        if(self.selected_gamemode == 'PVP'):
+            text = self.font.render(f"Farbauswahl rechts:", True, (255, 255, 255))  # Weißer Text
+            self.display.blit(text, (x-60, y+380))  # Wählen Sie eine geeignete Position
+            pygame.draw.rect(self.display, self.color_r, (x+120, y+400, 15, 150), 0)
+            self.slider_r_1.draw()
+            self.slider_r_2.draw()
+            self.slider_r_3.draw()
 
 
     def next_ball(self):
@@ -245,12 +315,14 @@ class Startmenu():
         self.index += 1
         if self.index >= len(self.ball_options):
             self.index = 0
+        pygame.mixer.Sound.play(gs.click_sound)
 
     def prev_ball(self):
         # Nächsten Ball auswählen
         self.index -= 1
         if self.index < 0:
             self.index = len(self.ball_options) - 1
+        pygame.mixer.Sound.play(gs.click_sound)
 
     def next_gamemode(self):
         # Vorherigen Gamemode auswählen
@@ -258,6 +330,7 @@ class Startmenu():
             self.selected_gamemode = 'PVP'
         elif self.selected_gamemode == 'PVP':
             self.selected_gamemode = 'AI'
+        pygame.mixer.Sound.play(gs.click_sound)
 
         
     def check_input(self, events):
@@ -273,6 +346,16 @@ class Startmenu():
                     self.next_ball()
                 elif pygame.Rect(x-85-radius, y+100, radius+40, 70).collidepoint(mouse_pos): 
                     self.next_gamemode()
+        self.slider1.check_input(events)
+        self.slider2.check_input(events)
+        self.slider3.check_input(events)
+        self.set_color_left_paddle()
+        if(self.selected_gamemode == 'PVP'):
+            self.slider_r_1.check_input(events)
+            self.slider_r_2.check_input(events)
+            self.slider_r_3.check_input(events)
+        self.set_color_right_paddle()
+
         
     
     def get_curr_im(self):
@@ -282,33 +365,46 @@ class Startmenu():
     
     def get_curr_gamemode(self):
         return self.selected_gamemode
+    
+    def set_color_left_paddle(self):
+        color = (self.slider1.current_val, self.slider2.current_val, self.slider3.current_val)
+        self.color_l = color
+        gs.paddle1.color = color
+    
+    def set_color_right_paddle(self):
+        color = (self.slider_r_1.current_val, self.slider_r_2.current_val, self.slider_r_3.current_val)
+        self.color_r = color
+        gs.paddle2.color = color
+    
+        
+
 
 
 
 
 class GameState():
     def __init__(self) -> None:
+        self.game_started = False
         self.particles: list = []
         pygame.mixer.init()
         pygame.mixer.music.load("Sounds/music-background.mp3") 
         pygame.mixer.music.play(-1,0.0)
 
         self.explosion = pygame.mixer.Sound("Sounds/explosion.mp3")
-        self.explosion.set_volume(0.2)
+        self.explosion.set_volume(0.1)
         self.bounce = pygame.mixer.Sound("Sounds/bounce.wav")
+        self.bounce.set_volume(0.7)
         self.click_sound = pygame.mixer.Sound("Sounds/click.wav")
-        self.click_sound.set_volume(0.2)
+        self.click_sound.set_volume(0.3)
 
         # spiel läuft bis zu dieser Punktzahl, anfangs auf 100, damit die Paddles bei Start im Hintergrund lange spielen
-        self.game_length = [100]
+        self.game_length = 100
 
         self.display = pygame.display.set_mode(screen_size, pygame.FULLSCREEN | pygame.SCALED, vsync=True)
-
-        self.start_menu = Startmenu(self.display)
         #initialisiert die obstacles
         self.obstacles = [Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)) for i in range(0,2)]
         self.FPS = pygame.time.Clock()
-        self.speed_increment = [1]
+        self.speed_increment = 1
         self.paddle1 = Paddle(50, screen_size[1]//2 - 175, 15, 150, 12)
         self.paddle2 = Paddle(screen_size[0]-65, screen_size[1]//2 - 175, 15, 150, 12)
         self.ball = Ball(screen_size[0]//2, screen_size[1]//2, radius, 6)
@@ -317,9 +413,11 @@ class GameState():
 
         self.trace: list = []
         self.MAX_SPEED_SQ = 500
-        self.gamemode = ["LAZY"]
+        self.gamemode = "LAZY"
 
         self.do_on_end_bool = True
+
+        self.start_menu = Startmenu(self.display)
 
     def draw_crown(self, pos):
         x = pos[0]-20
@@ -360,14 +458,14 @@ class GameState():
 
     def move_players(self):
         keys = pygame.key.get_pressed()
-        if(self.gamemode[0]=="PVP"):
+        if(self.gamemode=="PVP"):
             self.paddle1.move(keys[pygame.K_w], keys[pygame.K_s])
             self.paddle2.move(keys[pygame.K_UP], keys[pygame.K_DOWN])
-        if(self.gamemode[0]=="AI"):
+        if(self.gamemode=="AI"):
             self.paddle1.move(keys[pygame.K_w], keys[pygame.K_s])
             if(self.ball.speed[0] > 0 and ((self.ball.rect.centery - self.paddle2.rect.centery) > 20 or (self.ball.rect.centery - self.paddle2.rect.centery) < -20)):
                 self.paddle2.move(self.ball.rect.centery < self.paddle2.rect.centery, self.ball.rect.centery > self.paddle2.rect.centery)
-        if(self.gamemode[0]=="LAZY"):
+        if(self.gamemode=="LAZY"):
             if(self.ball.speed[0] > 0 and ((self.ball.rect.centery - self.paddle2.rect.centery) > 20 or (self.ball.rect.centery - self.paddle2.rect.centery) < -20)):
                 self.paddle2.move(self.ball.rect.centery < self.paddle2.rect.centery, self.ball.rect.centery > self.paddle2.rect.centery)
             if(self.ball.speed[0] < 0 and ((self.ball.rect.centery - self.paddle1.rect.centery) > 20 or (self.ball.rect.centery - self.paddle1.rect.centery) < -20)):
@@ -378,13 +476,13 @@ class GameState():
         if self.ball.rect.colliderect(self.paddle1.rect) and self.ball.speed[0]<0:
             self.ball.speed[0] = -self.ball.speed[0]
             self.ball.speed[1] = random.randint(-10, 10)
-            if game_started[0]:
+            if gs.game_started:
                 pygame.mixer.Sound.play(self.bounce)
         # Ball kollidiert mit rechtem paddle
         if self.ball.rect.colliderect(self.paddle2.rect) and self.ball.speed[0]>0:
             self.ball.speed[0] = -self.ball.speed[0]
             self.ball.speed[1] = random.randint(-10, 10) 
-            if game_started[0]:
+            if gs.game_started:
                 pygame.mixer.Sound.play(self.bounce)
 
     def check_ball_scored(self):
@@ -392,12 +490,12 @@ class GameState():
         if self.ball.rect.left < -10:
             self.score[1] += 1
             self.particles += [Particle(*self.ball.rect.center) for _ in range(300)]
-            if game_started[0]:
+            if gs.game_started:
                 pygame.mixer.Sound.play(self.explosion)
             self.ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
             self.ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
             self.ball.speed = [5 * random.choice((-1.5, 1.5)), 5 * random.choice((-1, 1))] 
-            self.speed_increment[0] = 1
+            self.speed_increment = 1
             self.obstacles.pop(0)
             self.obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
 
@@ -405,12 +503,12 @@ class GameState():
         elif self.ball.rect.right > screen_size[0]+10:
             self.score[0] += 1
             self.particles += [Particle(*self.ball.rect.center) for _ in range(300)]
-            if game_started[0]:
+            if gs.game_started:
                 pygame.mixer.Sound.play(self.explosion)
             self.ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
             self.ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
             self.ball.speed = [5 * random.choice((-1.5, 1.5)), 5 * random.choice((-1, 1))] 
-            self.speed_increment[0] = 1
+            self.speed_increment = 1
             self.obstacles.pop(1)
             self.obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
 
@@ -419,7 +517,7 @@ class GameState():
         for obstacle in self.obstacles:  
             if self.ball.rect.colliderect(obstacle.rect):
                 obstacle.collide_with(self.ball)
-                if game_started[0]:
+                if gs.game_started:
                     pygame.mixer.Sound.play(self.bounce)
         
     def dim_screen(self,x):
@@ -453,16 +551,16 @@ class GameState():
 
     def increase_speed(self):
         # Quadratisches summe der Geschwindigkeiten
-        total_speed = self.ball.speed[0]*self.ball.speed[0]*self.speed_increment[0] + self.ball.speed[1]*self.ball.speed[1]*self.speed_increment[0]
+        total_speed = self.ball.speed[0]*self.ball.speed[0]*self.speed_increment + self.ball.speed[1]*self.ball.speed[1]*self.speed_increment
         # Überprüfen, ob die Gesamtgeschwindigkeit den maximalen Wert überschritten hat
         if total_speed < self.MAX_SPEED_SQ:
-            self.speed_increment[0] = self.speed_increment[0] + 0.0002
+            self.speed_increment = self.speed_increment + 0.0002
 
     def game_ended(self):
         self.game_ended_animation()
 
     def reset_game(self):
-        self.gamemode[0] = self.start_menu.get_curr_gamemode()
+        self.gamemode = self.start_menu.get_curr_gamemode()
         self.score[0] = 0 
         self.score[1] = 0 
         self.obstacles.clear()
@@ -474,12 +572,12 @@ class GameState():
         self.obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
         PulsatingText.Texts.clear()
         self.particles.clear()
-        game_started[0] = True
-        self.game_length[0] = 5
+        gs.game_started = True
+        self.game_length = 5
         self.ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
         self.ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
         self.ball.speed = [5 * random.choice((-1.5, 1.5)), 5 * random.choice((-1, 1))] 
-        self.speed_increment[0] = 1
+        self.speed_increment = 1
         self.display.fill((15,15,15))
         self.show_score()
         self.draw_obstacles()
@@ -497,7 +595,7 @@ gs = GameState()
 
 # main game loop
 while gs.running:
-    if max(gs.score[0], gs.score[1]) < gs.game_length[0]:
+    if max(gs.score[0], gs.score[1]) < gs.game_length:
         gs.trace += [Trace_particle(*gs.ball.rect.center)]
     try:
         #checkt ob das Spiel beendet wurde
@@ -511,19 +609,19 @@ while gs.running:
                     pygame.quit()
                     sys.exit()
                 if event.key == pygame.K_SPACE:
-                    if not game_started[0]:
+                    if not gs.game_started:
                         gs.reset_game()
-                        gs.gamemode[0] = gs.start_menu.get_curr_gamemode()
-                    if event.key == pygame.K_SPACE and max(gs.score[0], gs.score[1]) >= gs.game_length[0]:
+                        gs.gamemode = gs.start_menu.get_curr_gamemode()
+                    if event.key == pygame.K_SPACE and max(gs.score[0], gs.score[1]) >= gs.game_length:
                         gs.reset_game()
                         gs.do_on_end_bool = True
 
 
-        if max(gs.score[0], gs.score[1]) < gs.game_length[0]:
+        if max(gs.score[0], gs.score[1]) < gs.game_length:
             gs.move_players()
             gs.check_paddle_colissions()
             gs.check_colissions_obstacles()
-            gs.ball.move(gs.speed_increment[0])
+            gs.ball.move(gs.speed_increment)
             gs.increase_speed()
             gs.check_ball_scored()
         #bild reseten (entspricht Hintergrundfarbe)
@@ -532,22 +630,22 @@ while gs.running:
         gs.show_score()
         gs.draw_obstacles()
 
-        if max(gs.score[0], gs.score[1]) >= gs.game_length[0]:
+        if max(gs.score[0], gs.score[1]) >= gs.game_length:
             gs.dim_screen(60)
 
         #paddles und ball zeichnen
         gs.paddle1.draw(gs.display)
         gs.paddle2.draw(gs.display)
-        if max(gs.score[0], gs.score[1]) < gs.game_length[0]:
+        if max(gs.score[0], gs.score[1]) < gs.game_length:
             gs.ball.draw(gs.display)
-        if max(gs.score[0], gs.score[1]) >= gs.game_length[0]:
+        if max(gs.score[0], gs.score[1]) >= gs.game_length:
             gs.game_ended()
             if gs.do_on_end_bool:
                 PulsatingText(gs.display, "Press Spacebar To Continue", (screen_size[0]//2, 3*screen_size[1]//4), 36)
                 gs.do_on_end_bool = False
 
         
-        if not game_started[0]:
+        if not gs.game_started:
             gs.dim_screen(70)
             gs.start_menu.check_input(events)
             gs.start_menu.draw()
