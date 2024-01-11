@@ -595,8 +595,9 @@ class GameState():
         pygame.display.update()
         pygame.event.pump()
         pygame.time.delay(1500)  
-   
-gs = GameState()
+        
+if __name__ == '__main__':
+    gs = GameState()
 
 # main game loop
 while gs.running:
