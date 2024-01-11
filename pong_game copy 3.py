@@ -220,9 +220,9 @@ class Slider():
                     self.current_val = int(max(self.min_val, min(self.current_val, self.max_val)))
             elif event.type == pygame.MOUSEBUTTONUP:
                 mouse_pos = pygame.mouse.get_pos()
-                self.dragging = False
-                if self.rect.collidepoint(mouse_pos): 
+                if self.dragging: 
                     pygame.mixer.Sound.play(gs.click_sound)
+                self.dragging = False
             elif event.type == pygame.MOUSEMOTION:
                 if self.dragging:
                     mouse_pos = pygame.mouse.get_pos()
@@ -261,7 +261,7 @@ class Startmenu():
                 image = pygame.transform.scale(image, (radius*4, radius*4)) 
                 self.ball_options.append(image)
         
-        PulsatingText(display, "Press Spacebar To Play", (screen_size[0]//2, 3*screen_size[1]//4), 36)
+        PulsatingText(display, "Press Spacebar To Play", (screen_size[0]//2, 3*screen_size[1]//4+100), 36)
 
 
     def draw(self):
