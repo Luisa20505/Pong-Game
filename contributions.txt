@@ -5,7 +5,7 @@ Pictures:
     - Kjell_Granlund - Raumschiff (opengameart.org/content/random-ships)
 
 Sounds:
-    -          - explosion 
+    - pixabay - explosion (pixabay.com/sound-effects/hq-explosion-6288/)
     - OwlStorm - bounce (freesound.org/people/OwlStorm/sounds/404769/)
     - davo32 - music-background (freesound.org/people/davo32/sounds/628445/)
     - stijn - click (freesound.org/people/stijn/sounds/43676/)
