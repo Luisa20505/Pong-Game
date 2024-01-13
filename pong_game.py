@@ -137,8 +137,8 @@ class Particle:
 
     def update(self):
         """called when position of the particle is to be updated"""
-        self.rect.move_ip(self.speed)
-        self.life -= 1
+        self.rect.move_ip((self.speed[0]*gs.dt_last_frame,self.speed[1]*gs.dt_last_frame))
+        self.life -= 1.5*gs.dt_last_frame
     
     def draw(self, display):
         """draws the paddle.
@@ -156,12 +156,12 @@ class Trace_particle():
         self.rect = pygame.Rect(x, y, 5, 5)
         self.speed = [0, 0]  # derive x and y speed from angle
         self.color = (255, random.randint(0,100), 0) 
-        self.life = random.randint(50, 100)
+        self.life = random.randint(30,80)
 
     def update(self):
         """called when position of the particle is to be updated"""
-        self.rect.move_ip(self.speed)
-        self.life -= 1
+        self.rect.move_ip((self.speed[0]*gs.dt_last_frame,self.speed[1]*gs.dt_last_frame))
+        self.life -= 1.0*gs.dt_last_frame
     
     def draw(self, display):
         """draws the paddle.
@@ -450,7 +450,7 @@ class GameState():
         x_delta = winner_paddle.rect.centerx - screen_size[0]//2
         y_delta = winner_paddle.rect.centery - screen_size[1]//2
         move_by = [0,0]
-        move_speed = 10.0 # adjust this value to change the speed of paddles moving towards center
+        move_speed = 10.0*gs.dt_last_frame
         if abs(x_delta) > 10:
             move_by[0] = -1.0 * move_speed if x_delta > 0 else move_speed
         if abs(y_delta) > 10:
@@ -601,9 +601,12 @@ class GameState():
 if __name__ == '__main__':
     gs = GameState()
 
+trace_counter = 1
 # main game loop
 while gs.running:
-    if max(gs.score[0], gs.score[1]) < gs.game_length:
+    trace_counter+=gs.dt_last_frame
+    if max(gs.score[0], gs.score[1]) < gs.game_length and trace_counter > 0.8:
+        trace_counter = 0
         gs.trace += [Trace_particle(*gs.ball.rect.center)]
     try:
         #checkt ob das Spiel beendet wurde
