@@ -43,9 +43,9 @@ class Paddle:
         
         down: if paddle is to move down."""
         if up and self.rect.top > 0:
-            self.rect.move_ip(0, -self.speed)
+            self.rect.move_ip(0, -self.speed*gs.dt_last_frame)
         if down and self.rect.bottom < screen_size[1]:
-            self.rect.move_ip(0, self.speed)
+            self.rect.move_ip(0, self.speed*gs.dt_last_frame)
    
 class Ball:
     #defines an instance of a the ball
@@ -84,7 +84,7 @@ class Ball:
                 self.speed[1] = -self.speed[1]
                 if gs.game_started:
                     pygame.mixer.Sound.play(gs.bounce)
-        self.rect.move_ip([speed * speed_inc for speed in self.speed])
+        self.rect.move_ip([speed * speed_inc *gs.dt_last_frame for speed in self.speed])
 
 class Obstacle:   
     #defines a new obstacle
@@ -180,7 +180,7 @@ class PulsatingText:
         PulsatingText.Texts.append(self)
 
     def update(self):
-        self.phase = (self.phase + 0.04) % (2 * math.pi)
+        self.phase = (self.phase + 0.04*gs.dt_last_frame) % (2 * math.pi)
 
     def draw(self):
         pulse_val = abs(math.sin(self.phase)) 
@@ -415,6 +415,7 @@ class GameState():
         self.ball = Ball(screen_size[0]//2, screen_size[1]//2, radius, 6)
         self.score = [0, 0]
         self.running = True
+        self.dt_last_frame = 1
 
         self.trace: list = []
         self.MAX_SPEED_SQ = 500
@@ -559,7 +560,7 @@ class GameState():
         total_speed = self.ball.speed[0]*self.ball.speed[0]*self.speed_increment + self.ball.speed[1]*self.ball.speed[1]*self.speed_increment
         # Überprüfen, ob die Gesamtgeschwindigkeit den maximalen Wert überschritten hat
         if total_speed < self.MAX_SPEED_SQ:
-            self.speed_increment = self.speed_increment + 0.0002
+            self.speed_increment = self.speed_increment + 0.0002*gs.dt_last_frame
 
     def game_ended(self):
         self.game_ended_animation()
@@ -595,6 +596,7 @@ class GameState():
         pygame.display.update()
         pygame.event.pump()
         pygame.time.delay(1500)  
+        gs.FPS.tick()
         
 if __name__ == '__main__':
     gs = GameState()
@@ -661,8 +663,10 @@ while gs.running:
             t.draw()
             
         pygame.display.flip()
-        gs.FPS.tick(60) #limitiert bildwiederholungsrate auf 60 fps
-   
+        #multipliziert mit dt_last_frame wirkt es so, als liefen 60 fps. 
+        #Für weicheres zeichnen wird versucht, die FPS zu maximieren ohne Animationen oder Zeitkritische Abläufe zu verändern. 
+        gs.dt_last_frame = gs.FPS.tick()/17
+
     except Exception as e:
         
         print('Fehler : ',e, '  Fehler in Zeile: ', e.__traceback__.tb_lineno)
