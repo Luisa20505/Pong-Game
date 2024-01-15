@@ -40,7 +40,6 @@ class Paddle:
         """function to move the paddles.
         
         up: if paddle is to move up.
-        
         down: if paddle is to move down."""
         if up and self.rect.top > 0:
             self.rect.move_ip(0, -self.speed*gs.dt_last_frame)
@@ -55,7 +54,7 @@ class Ball:
         x: X-koordinate of the ball
         y: Y-koordinate of the ball
         radius: radius of the ball
-        speed: base-speed of the ball (in px per frame)
+        speed: base-speed of the ball (in px per frame at 60 fps)
         """
         self.rect = pygame.Rect(x, y, radius*2, radius*2)
         self.speed = [speed * random.choice((-1, 1)), speed * random.choice((-1, 1))]
@@ -130,8 +129,9 @@ class Particle:
         
         y: Y-koordinate of the particle."""
         self.rect = pygame.Rect(x, y, 5, 5)
-        angle = 2 * math.pi * random.random()  # create a random angle
-        self.speed = [(random.random() * 10) * math.cos(angle), (random.random() * 10) * math.sin(angle)]  # derive x and y speed from angle
+        angle = math.pi * random.uniform(0,2)
+        rand_speed = random.uniform(0,10)
+        self.speed = [rand_speed * math.cos(angle), rand_speed * math.sin(angle)] 
         self.color = (255, random.randint(0,100), 0) 
         self.life = random.randint(50, 100)
 
@@ -172,6 +172,12 @@ class PulsatingText:
 
     Texts = []
     def __init__(self, display, text, center, font_size=36):
+        """defines a new pulsating text.
+        
+        display: pygame instance of the display to draw on.
+        text: text the pulsating text should display in game.
+        center: list(x-position, y-positio).
+        fint_size: default = 36px."""
         self.display = display
         self.text = text
         self.center = center
@@ -180,9 +186,11 @@ class PulsatingText:
         PulsatingText.Texts.append(self)
 
     def update(self):
+        """updates the phase of the blink."""
         self.phase = (self.phase + 0.04*gs.dt_last_frame) % (2 * math.pi)
 
     def draw(self):
+        """draws the Text on the display"""
         pulse_val = abs(math.sin(self.phase)) 
         pulse_color = (pulse_val * 255, pulse_val * 255, pulse_val * 255)
         font = pygame.font.SysFont(None, self.font_size) 
@@ -192,6 +200,17 @@ class PulsatingText:
             
 class Slider():
     def __init__(self, display, x, y, width, height, color, min_val, max_val, start_val):
+        """defines an instance of a Slider. 
+        
+         display: pygame instance of the display to draw on.
+         x,y: x- and y coordinates of the slider.
+         width: width of the slider.
+         height: height of the slider.
+         color: color of the slider (R,G,B).
+         min_val: minimum value.
+         max_value: maximum value.
+         start_val: presest starting value.
+        """
         self.display = display
         self.x = x
         self.y = y
@@ -207,6 +226,7 @@ class Slider():
         self.dragging_pos = 0
     
     def draw(self):
+        """draws the paddle."""
         pygame.draw.rect(self.display, self.color, self.rect)
         pygame.draw.rect(self.display, (0, 0, 0), self.rect, 2)
         pygame.draw.rect(self.display, (255, 255, 255), (self.x + self.current_val/self.max_val * self.width - 5, self.y - 5, 10, self.height + 10), 2)
@@ -215,6 +235,8 @@ class Slider():
         self.display.blit(text, (self.x + self.current_val/self.max_val * self.width - 10, self.y + self.height + 10))
     
     def check_input(self, events):
+        """checks the inputs to the slider.
+        events: pygame.event"""
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
@@ -237,6 +259,9 @@ class Slider():
 
 class Startmenu():
     def __init__(self, display):
+        """defines a new startmenu.
+
+        display: instance of the display to draw on."""
         self.selected_gamemode = 'AI'
         self.display = display
         folder_path = "Bilder/Ball"
@@ -270,6 +295,7 @@ class Startmenu():
 
 
     def draw(self):
+        """draws the startmenue to the display"""
         x = screen_size[0]//2
         y = 200
         # Links-Dreieck (Pfeil)
@@ -339,6 +365,8 @@ class Startmenu():
 
         
     def check_input(self, events):
+        """checks input to the startmenue.
+        events: pygame.event"""
         x = screen_size[0]//2
         y = 200
         for event in events:
@@ -363,12 +391,13 @@ class Startmenu():
 
         
     
-    def get_curr_im(self):
+    def get_curr_im(self) -> pygame.image:
+        """returns current selected image of the ball."""
         image = self.ball_options[self.index]
         image = pygame.transform.scale(image, (radius*2, radius*2)) 
         return image
     
-    def get_curr_gamemode(self):
+    def get_curr_gamemode(self) -> str:
         return self.selected_gamemode
     
     def set_color_left_paddle(self):
@@ -438,7 +467,7 @@ class GameState():
         x += 10
         pygame.draw.polygon(self.display, (255, 223, 0), [(x, y), (x - 10, y + 25), (x + 10, y + 25)])
 
-    def draw_winner_text(self, winner_paddle):
+    def draw_winner_name(self, winner_paddle):
         font = pygame.font.SysFont(None, 72, bold=True) 
         text = font.render("Player " + str(self.score.index(max(self.score[0], self.score[1]))+1) + " Wins!", True, (255, 223, 0))
         text_rect = text.get_rect(center=(screen_size[0]//2, screen_size[1]//4))
@@ -459,8 +488,7 @@ class GameState():
         winner_paddle.draw(self.display)
         if abs(x_delta) <= 10 and abs(y_delta) <= 10:
             self.draw_crown((winner_paddle.rect.centerx, winner_paddle.rect.y - 40))
-            self.draw_winner_text(winner_paddle)
-        return False
+            self.draw_winner_name(winner_paddle)
 
     def move_players(self):
         keys = pygame.key.get_pressed()
@@ -495,12 +523,11 @@ class GameState():
         #Punkt für rechts
         if self.ball.rect.left < -10:
             self.score[1] += 1
-            self.particles += [Particle(*self.ball.rect.center) for _ in range(300)]
+            self.particles += [Particle(*self.ball.rect.center) for _ in range(200)]
             if gs.game_started:
                 pygame.mixer.Sound.play(self.explosion)
             self.ball.rect.center = (screen_size[0]//2, screen_size[1]//2)
-            self.ball.speed = [5 * random.choice((-1, 1)), 5 * random.choice((-1, 1))] 
-            self.ball.speed = [5 * random.choice((-1.5, 1.5)), 5 * random.choice((-1, 1))] 
+            self.ball.speed = [5 * random.choice((-1.5, 1.5)), 5 * random.uniform(-1, 1)] 
             self.speed_increment = 1
             self.obstacles.pop(0)
             self.obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
@@ -562,9 +589,6 @@ class GameState():
         if total_speed < self.MAX_SPEED_SQ:
             self.speed_increment = self.speed_increment + 0.0002*gs.dt_last_frame
 
-    def game_ended(self):
-        self.game_ended_animation()
-
     def reset_game(self):
         self.gamemode = self.start_menu.get_curr_gamemode()
         self.score[0] = 0 
@@ -605,75 +629,71 @@ trace_counter = 1
 # main game loop
 while gs.running:
     trace_counter+=gs.dt_last_frame
-    if max(gs.score[0], gs.score[1]) < gs.game_length and trace_counter > 0.8:
+    if max(gs.score[0], gs.score[1]) < gs.game_length and trace_counter > 1:
         trace_counter = 0
         gs.trace += [Trace_particle(*gs.ball.rect.center)]
-    try:
-        #checkt ob das Spiel beendet wurde
-        events = pygame.event.get() 
-        for event in events:
-            if event.type == pygame.QUIT:
+
+    #checkt ob das Spiel beendet wurde
+    events = pygame.event.get() 
+    for event in events:
+        if event.type == pygame.QUIT:
+            gs.running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
                 gs.running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    gs.running = False
-                    pygame.quit()
-                    sys.exit()
-                if event.key == pygame.K_SPACE:
-                    if not gs.game_started:
-                        gs.reset_game()
-                        gs.gamemode = gs.start_menu.get_curr_gamemode()
-                    if event.key == pygame.K_SPACE and max(gs.score[0], gs.score[1]) >= gs.game_length:
-                        gs.reset_game()
-                        gs.do_on_end_bool = True
+                pygame.quit()
+                sys.exit()
+            if event.key == pygame.K_SPACE:
+                if not gs.game_started:
+                    gs.reset_game()
+                    gs.gamemode = gs.start_menu.get_curr_gamemode()
+                if event.key == pygame.K_SPACE and max(gs.score[0], gs.score[1]) >= gs.game_length:
+                    gs.reset_game()
+                    gs.do_on_end_bool = True
 
 
-        if max(gs.score[0], gs.score[1]) < gs.game_length:
-            gs.move_players()
-            gs.check_paddle_colissions()
-            gs.check_colissions_obstacles()
-            gs.ball.move(gs.speed_increment)
-            gs.increase_speed()
-            gs.check_ball_scored()
-        #bild reseten (entspricht Hintergrundfarbe)
-        gs.display.fill((15, 15, 15))
-        gs.update_draw_particles()
-        gs.show_score()
-        gs.draw_obstacles()
+    if max(gs.score[0], gs.score[1]) < gs.game_length:
+        gs.move_players()
+        gs.check_paddle_colissions()
+        gs.check_colissions_obstacles()
+        gs.ball.move(gs.speed_increment)
+        gs.increase_speed()
+        gs.check_ball_scored()
+    #bild reseten (entspricht Hintergrundfarbe)
+    gs.display.fill((15, 15, 15))
+    gs.update_draw_particles()
+    gs.show_score()
+    gs.draw_obstacles()
 
-        if max(gs.score[0], gs.score[1]) >= gs.game_length:
-            gs.dim_screen(60)
+    if max(gs.score[0], gs.score[1]) >= gs.game_length:
+        gs.dim_screen(60)
 
-        #paddles und ball zeichnen
-        gs.paddle1.draw(gs.display)
-        gs.paddle2.draw(gs.display)
-        if max(gs.score[0], gs.score[1]) < gs.game_length:
-            gs.ball.draw(gs.display)
-        if max(gs.score[0], gs.score[1]) >= gs.game_length:
-            gs.game_ended()
-            if gs.do_on_end_bool:
-                PulsatingText(gs.display, "Press Spacebar To Continue", (screen_size[0]//2, 3*screen_size[1]//4), 36)
-                gs.do_on_end_bool = False
+    #paddles und ball zeichnen
+    gs.paddle1.draw(gs.display)
+    gs.paddle2.draw(gs.display)
+    if max(gs.score[0], gs.score[1]) < gs.game_length:
+        gs.ball.draw(gs.display)
+    if max(gs.score[0], gs.score[1]) >= gs.game_length:
+        gs.game_ended_animation()
+        if gs.do_on_end_bool:
+            PulsatingText(gs.display, "Press Spacebar To Continue", (screen_size[0]//2, 3*screen_size[1]//4), 36)
+            gs.do_on_end_bool = False
 
+    
+    if not gs.game_started:
+        gs.dim_screen(70)
+        gs.start_menu.check_input(events)
+        gs.start_menu.draw()
+
+    for t in PulsatingText.Texts:
+        t.update()
+        t.draw()
         
-        if not gs.game_started:
-            gs.dim_screen(70)
-            gs.start_menu.check_input(events)
-            gs.start_menu.draw()
+    pygame.display.flip()
+    #multipliziert mit dt_last_frame wirkt es so, als liefen 60 fps. 
+    #Für weicheres zeichnen wird versucht, die FPS zu maximieren ohne Animationen oder Zeitkritische Abläufe zu verändern. 
+    gs.dt_last_frame = gs.FPS.tick()/17
 
-        for t in PulsatingText.Texts:
-            t.update()
-            t.draw()
-            
-        pygame.display.flip()
-        #multipliziert mit dt_last_frame wirkt es so, als liefen 60 fps. 
-        #Für weicheres zeichnen wird versucht, die FPS zu maximieren ohne Animationen oder Zeitkritische Abläufe zu verändern. 
-        gs.dt_last_frame = gs.FPS.tick()/17
-
-    except Exception as e:
-        
-        print('Fehler : ',e, '  Fehler in Zeile: ', e.__traceback__.tb_lineno)
-        gs.running = False
-        break
+    
 pygame.quit()
 sys.exit()
