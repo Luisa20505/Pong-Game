@@ -1,7 +1,7 @@
 #Implementation von Pong mithilfe von Pygame
 #Authors: Jonas Gießler, Luisa Gaiser
 #Bild und Soundquellen siehe contributions.txt
-
+#Wie Besprochen, sind die Klassen Player und AI Player nicht einzeln umgesetzt
 
 import pygame
 import sys
@@ -264,7 +264,7 @@ class Startmenu():
         display: instance of the display to draw on."""
         self.selected_gamemode = 'AI'
         self.display = display
-        folder_path = "Bilder/Ball"
+        folder_path_balls = "Bilder/Ball"
         self.ball_options = []
         self.index = 0
         self.font_size = 25
@@ -280,9 +280,9 @@ class Startmenu():
         self.slider_r_2 = Slider(display, screen_size[0]//2 - 100, y+470, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
         self.slider_r_3 = Slider(display, screen_size[0]//2 - 100, y+520, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
 
-        for filename in os.listdir(folder_path):
+        for filename in os.listdir(folder_path_balls):
             # Stellt den vollständigen Pfad zur Datei her
-            filepath = os.path.join(folder_path, filename)
+            filepath = os.path.join(folder_path_balls, filename)
 
             # Überprüft, ob die Datei eine Bilddatei ist (z.B. endet auf .png)
             if filepath.endswith((".png", ".jpg", ".jpeg")):
@@ -448,7 +448,7 @@ class GameState():
 
         self.trace: list = []
         self.MAX_SPEED_SQ = 500
-        self.gamemode = "LAZY"
+        self.gamemode = "LAZY" #'LAZY' für PC vs. PC, 'AI' für Spieler vs. Computer und 'PVP'.
 
         self.do_on_end_bool = True
 
@@ -475,6 +475,7 @@ class GameState():
         self.display.blit(text, text_rect)
 
     def game_ended_animation(self):
+        #bewegt das gewinner-Paddle in die Mitte des Bildschirms
         winner_paddle = self.paddle1 if self.score.index(max(self.score[0],self.score[1])) == 0 else self.paddle2
         x_delta = winner_paddle.rect.centerx - screen_size[0]//2
         y_delta = winner_paddle.rect.centery - screen_size[1]//2
