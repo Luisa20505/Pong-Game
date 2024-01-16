@@ -621,10 +621,10 @@ class GameState():
         pygame.display.update()
         pygame.event.pump()
         pygame.time.delay(1500)  
-        gs.FPS.tick()
+        self.FPS.tick()
         
-if __name__ == '__main__':
-    gs = GameState()
+
+gs = GameState()
 
 trace_counter = 1
 # main game loop
