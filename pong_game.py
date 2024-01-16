@@ -309,7 +309,7 @@ class Startmenu():
 
         # Text für die aktuelle Auswahl zeichnen
         text = self.font.render(f"{self.index + 1}/{len(self.ball_options)}", True, (255, 255, 255))  # Weißer Text
-        self.display.blit(text, (x-15, y+radius+75))  # Wählen Sie eine geeignete Position
+        self.display.blit(text, (x-15, y+radius+45))  # Wählen Sie eine geeignete Position
 
         # Text für Gamemodeauswahl zeichnen (Spiel läuft im Hintergrund im Lazy-Modus)
         text = self.font.render(f"Gamemode: {self.selected_gamemode}", True, (255, 255, 255))
@@ -326,14 +326,14 @@ class Startmenu():
         pygame.draw.rect(self.display, (127, 0, 0), (x-90-radius, y+120, 70, 30), 2)
 
         # draws a paddle to select its colors
-        text = self.font.render(f"Farbauswahl links:", True, (255, 255, 255))  # Weißer Text
+        text = self.font.render(f"Farbauswahl links (R,G,B):", True, (255, 255, 255))  # Weißer Text
         self.display.blit(text, (x-60, y+180))  # Wählen Sie eine geeignete Position
         pygame.draw.rect(self.display, self.color_l, (x-120, y+200, 15, 150), 0)
         self.slider1.draw()
         self.slider2.draw()
         self.slider3.draw()
         if(self.selected_gamemode == 'PVP'):
-            text = self.font.render(f"Farbauswahl rechts:", True, (255, 255, 255))  # Weißer Text
+            text = self.font.render(f"Farbauswahl rechts (R,G,B):", True, (255, 255, 255))  # Weißer Text
             self.display.blit(text, (x-60, y+380))  # Wählen Sie eine geeignete Position
             pygame.draw.rect(self.display, self.color_r, (x+120, y+400, 15, 150), 0)
             self.slider_r_1.draw()
@@ -677,7 +677,9 @@ while gs.running:
     if max(gs.score[0], gs.score[1]) >= gs.game_length:
         gs.game_ended_animation()
         if gs.do_on_end_bool:
-            PulsatingText(gs.display, "Press Spacebar To Continue", (screen_size[0]//2, 3*screen_size[1]//4), 36)
+            PulsatingText(gs.display, "Press Spacebar For Rematch", (screen_size[0]//2, 3*screen_size[1]//4))
+            PulsatingText(gs.display, "Press Esc to quit", (screen_size[0]//2, 3*screen_size[1]//4+40), 28)
+
             gs.do_on_end_bool = False
 
     
