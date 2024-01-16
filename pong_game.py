@@ -436,7 +436,7 @@ class GameState():
 
         self.display = pygame.display.set_mode(screen_size, pygame.FULLSCREEN | pygame.SCALED, vsync=True)
         #initialisiert die obstacles
-        self.obstacles = [Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)) for i in range(0,2)]
+        self.obstacles = [Obstacle(random.randint(100, screen_size[0]-200), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)) for i in range(0,2)]
         self.FPS = pygame.time.Clock()
         self.speed_increment = 1
         self.paddle1 = Paddle(50, screen_size[1]//2 - 175, 15, 150, 12)
@@ -531,7 +531,7 @@ class GameState():
             self.ball.speed = [5 * random.choice((-1.5, 1.5)), 5 * random.uniform(-1, 1)] 
             self.speed_increment = 1
             self.obstacles.pop(0)
-            self.obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
+            self.obstacles.append(Obstacle(random.randint(100, screen_size[0]-200), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
 
         #Punkt für links
         elif self.ball.rect.right > screen_size[0]+10:
@@ -544,7 +544,7 @@ class GameState():
             self.ball.speed = [5 * random.choice((-1.5, 1.5)), 5 * random.choice((-1, 1))] 
             self.speed_increment = 1
             self.obstacles.pop(1)
-            self.obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
+            self.obstacles.append(Obstacle(random.randint(100, screen_size[0]-200), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
 
     def check_colissions_obstacles(self):
         #hindernisse zeichnen und kollision
@@ -599,8 +599,8 @@ class GameState():
         self.paddle2.rect.centerx = screen_size[0]-65
         self.paddle1.rect.centery = screen_size[1]//2
         self.paddle2.rect.centery = screen_size[1]//2
-        self.obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
-        self.obstacles.append(Obstacle(random.randint(100, screen_size[0]-100), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
+        self.obstacles.append(Obstacle(random.randint(100, screen_size[0]-200), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
+        self.obstacles.append(Obstacle(random.randint(100, screen_size[0]-200), random.randint(100, screen_size[1]-100), random.randint(50,150), random.randint(50,150)))
         PulsatingText.Texts.clear()
         self.particles.clear()
         gs.game_started = True
