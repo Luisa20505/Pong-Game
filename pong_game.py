@@ -627,6 +627,7 @@ class GameState():
 gs = GameState()
 
 trace_counter = 1
+
 # main game loop
 while gs.running:
     trace_counter+=gs.dt_last_frame
