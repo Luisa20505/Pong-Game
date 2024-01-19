@@ -276,9 +276,9 @@ class Startmenu():
         self.slider2 = Slider(display, screen_size[0]//2 - 80, y+270, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
         self.slider3 = Slider(display, screen_size[0]//2 - 80, y+320, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
 
-        self.slider_r_1 = Slider(display, screen_size[0]//2 - 100, y+420, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
-        self.slider_r_2 = Slider(display, screen_size[0]//2 - 100, y+470, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
-        self.slider_r_3 = Slider(display, screen_size[0]//2 - 100, y+520, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
+        self.slider_r_1 = Slider(display, screen_size[0]//2 - 100, y+425, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
+        self.slider_r_2 = Slider(display, screen_size[0]//2 - 100, y+475, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
+        self.slider_r_3 = Slider(display, screen_size[0]//2 - 100, y+525, 200, 10, (255, 255, 255), 0, 255, random.randint(20, 255))
 
         for filename in os.listdir(folder_path_balls):
             # Stellt den vollständigen Pfad zur Datei her
@@ -327,15 +327,15 @@ class Startmenu():
 
         # draws a paddle to select its colors
         text = self.font.render(f"Farbauswahl links (R,G,B):", True, (255, 255, 255))  # Weißer Text
-        self.display.blit(text, (x-60, y+180))  # Wählen Sie eine geeignete Position
+        self.display.blit(text, (x-80, y+180))  # Wählen Sie eine geeignete Position
         pygame.draw.rect(self.display, self.color_l, (x-120, y+200, 15, 150), 0)
         self.slider1.draw()
         self.slider2.draw()
         self.slider3.draw()
         if(self.selected_gamemode == 'PVP'):
             text = self.font.render(f"Farbauswahl rechts (R,G,B):", True, (255, 255, 255))  # Weißer Text
-            self.display.blit(text, (x-60, y+380))  # Wählen Sie eine geeignete Position
-            pygame.draw.rect(self.display, self.color_r, (x+120, y+400, 15, 150), 0)
+            self.display.blit(text, (x-100, y+380))  # Wählen Sie eine geeignete Position
+            pygame.draw.rect(self.display, self.color_r, (x+120, y+405, 15, 150), 0)
             self.slider_r_1.draw()
             self.slider_r_2.draw()
             self.slider_r_3.draw()
