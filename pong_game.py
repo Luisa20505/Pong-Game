@@ -16,6 +16,7 @@ screen_size = (info_object.current_w, info_object.current_h)
 radius = 30
 background_color = (20, 20, 20)
 
+
 class Paddle:
     #A class defining the Paddles
     def __init__(self, x:int, y:int, width:int, height:int, speed:int):
