@@ -1,0 +1,18 @@
+
+Pictures:
+    - hayashi19 - ball-collection (opengameart.org/content/ball-collection)
+    - gothicfan95 - schwarz-weiß-fussball (opengameart.org/content/soccer-ball)
+    - Kjell_Granlund - Raumschiff (opengameart.org/content/random-ships)
+
+Sounds:
+    - pixabay - explosion (pixabay.com/sound-effects/hq-explosion-6288/)
+    - OwlStorm - bounce (freesound.org/people/OwlStorm/sounds/404769/)
+    - davo32 - music-background (freesound.org/people/davo32/sounds/628445/)
+    - stijn - click (freesound.org/people/stijn/sounds/43676/)
+
+
+All pictures, sound and music utilized in this project are used under Creative Commons Attribution or share alike licenses.
+
+https://creativecommons.org/licenses/by/4.0/
+https://creativecommons.org/licenses/by/3.0/
+https://creativecommons.org/publicdomain/zero/1.0/
